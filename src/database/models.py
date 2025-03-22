@@ -1,6 +1,9 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, TIMESTAMP, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
+
+def utcnow():
+    return datetime.now(timezone.utc)
 
 Base = declarative_base()
 
@@ -11,18 +14,18 @@ class User(Base):
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, nullable=False)
     hashed_password = Column(String, nullable=False)
-    registered_at = Column(TIMESTAMP, default=datetime.utcnow)
+    registered_at = Column(TIMESTAMP(timezone=True), default=utcnow)
 
 class URL(Base):
     __tablename__ = "urls"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     original_url = Column(String, nullable=False)
     tiny_url = Column(String, unique=True, nullable=False)
-    created_at = Column(TIMESTAMP, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP(timezone=True), default=utcnow)
     usage_count = Column(Integer, default=0)
-    last_used_at = Column(TIMESTAMP, nullable=True)
-    expires_at = Column(TIMESTAMP, nullable=True)
+    last_used_at = Column(TIMESTAMP(timezone=True), nullable=True)
+    expires_at = Column(TIMESTAMP(timezone=True), nullable=True)
 
     user = relationship("User")
