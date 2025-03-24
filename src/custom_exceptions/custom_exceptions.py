@@ -21,7 +21,7 @@ EmptyPayload = HTTPException(
 )
 
 NoUserFound = HTTPException(
-    status_code=status.HTTP_400_BAD_REQUEST,
+    status_code=status.HTTP_401_UNAUTHORIZED,
     detail="User does not exist. Use endpoint /auth/register."
 )
 
@@ -32,7 +32,28 @@ UserAlreadyExists = HTTPException(
         "Please authenticate or register with new credentials."
 )
 
-DBModificationFailure = HTTPException(
+DBManipulationFailure = HTTPException(
     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    detail="Database modification failed."
+    detail="Database manipulation failed."
+)
+
+ForbiddenAlias = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Forbidden alias: ensure that it 1) uses only alphanumeric characters, _ or -, "\
+        "2) does not consist of numbers only; 3) is not \"shorten\" or \"search\""
+)
+
+UnavailableAlias = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="Alias is already being used."
+)
+
+ForbiddenAction = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="It is forbedden to delete or change a tiny url that is not created by you."
+)
+
+NoURLFound = HTTPException(
+    status_code=status.HTTP_400_BAD_REQUEST,
+    detail="URL not found in the database."
 )

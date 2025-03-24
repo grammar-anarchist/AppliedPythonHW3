@@ -1,8 +1,8 @@
-"""Initial migration: user and url class
+"""Clean slate
 
-Revision ID: 1cc69b1f6c83
+Revision ID: 4515f1bcd97d
 Revises: 
-Create Date: 2025-03-22 18:42:58.333063
+Create Date: 2025-03-25 00:34:53.087260
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '1cc69b1f6c83'
+revision: str = '4515f1bcd97d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,19 +25,20 @@ def upgrade() -> None:
     sa.Column('username', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('hashed_password', sa.String(), nullable=False),
-    sa.Column('registered_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('registered_at', sa.TIMESTAMP(timezone=True), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
     op.create_table('urls',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('original_url', sa.String(), nullable=False),
-    sa.Column('tiny_url', sa.String(), nullable=False),
-    sa.Column('created_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('tiny_url', sa.String(), server_default=sa.text("currval('urls_id_seq')::text"), nullable=False),
+    sa.Column('created_at', sa.TIMESTAMP(timezone=True), nullable=True),
     sa.Column('usage_count', sa.Integer(), nullable=True),
-    sa.Column('last_used_at', sa.TIMESTAMP(), nullable=True),
-    sa.Column('expires_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('last_used_at', sa.TIMESTAMP(timezone=True), nullable=True),
+    sa.Column('expires_at', sa.TIMESTAMP(timezone=True), nullable=True),
+    sa.Column('redundant_period', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('tiny_url')
