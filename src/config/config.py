@@ -12,6 +12,11 @@ DB_NAME = os.getenv("DB_NAME")
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+
+REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}"
+
 DB_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 DB_URL_SYNC = DB_URL.replace("postgresql+asyncpg", "postgresql+psycopg")
 

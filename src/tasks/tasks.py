@@ -4,8 +4,9 @@ from celery.schedules import crontab
 
 import database.queries as db
 from database.session import create_sessionmaker_instance
+from config.config import REDIS_URL
 
-celery_app = Celery('tasks', broker='redis://localhost:6379')
+celery_app = Celery('tasks', broker=REDIS_URL)
 
 celery_app.conf.timezone = 'UTC'
 celery_app.conf.enable_utc = True

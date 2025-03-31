@@ -5,7 +5,8 @@ services:
     build:
       context: .
     container_name: fastapi_app
-    command: "python src/main.py"
+    command: >
+      sh -c "alembic upgrade head && python src/main.py"
     ports:
       - 8000:8000
     depends_on:
@@ -26,12 +27,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  migrations:
-    build: .
-    command: alembic upgrade head
-    depends_on:
-      - db
-
   redis:
     image: redis:7
     container_name: redis_app
@@ -44,7 +39,7 @@ services:
       context: .
     container_name: celery_worker
     working_dir: /app/src
-    command: celery -A tasks.celery_app worker --loglevel=info
+    command: celery -A tasks.tasks.celery_app worker --loglevel=info
     depends_on:
       - app
 
@@ -53,7 +48,7 @@ services:
       context: .
     container_name: celery_beat
     working_dir: /app/src
-    command: celery -A tasks.celery_app beat --loglevel=info
+    command: celery -A tasks.tasks.celery_app beat --loglevel=info
     depends_on:
       - celery
 
