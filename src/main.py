@@ -1,5 +1,4 @@
 import uvicorn
-import subprocess
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 
