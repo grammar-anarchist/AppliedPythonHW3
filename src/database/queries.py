@@ -3,7 +3,7 @@ from sqlalchemy import text
 from datetime import datetime, timezone
 from typing import Optional
 
-from database.session import get_session
+from database.session import create_session
 from database.models import User, URL
 from links.schemas import *
 from custom_exceptions import DBManipulationFailure
@@ -11,16 +11,14 @@ from custom_exceptions import DBManipulationFailure
 def db_session(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
-        async for db in get_session():
+        sessionmaker = kwargs.pop("sessionmaker", create_session)
+        async with sessionmaker() as db:
             try:
                 return await func(db, *args, **kwargs)
             except Exception as e:
                 await db.rollback()
                 print(f"Error occurred: {e}")
                 raise DBManipulationFailure
-            finally:
-                await db.close()
-                print("Session closed")
 
     return wrapper
 
@@ -97,7 +95,7 @@ async def record_usage(db, id: int):
     await db.commit()
 
 @db_session
-async def delete_expired_links(db):
+async def delete_unpopular_links(db):
     query = text("""
         DELETE FROM urls
         WHERE (
@@ -105,7 +103,7 @@ async def delete_expired_links(db):
                 WHEN last_used_at IS NOT NULL THEN last_used_at
                 ELSE created_at
             END
-        ) < (CURRENT_TIMESTAMP - INTERVAL '1 minute' * redundant_period);
+        ) < (CURRENT_TIMESTAMP - INTERVAL '1 day' * redundant_period);
     """)
     await db.execute(query)
     await db.commit()
