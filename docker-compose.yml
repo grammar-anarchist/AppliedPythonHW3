@@ -10,8 +10,10 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - migrations
-      - redis
+      db:
+        condition: service_healthy 
+      redis:
+        condition: service_started
   
   db:
     container_name: database_app
@@ -26,6 +28,11 @@ services:
       - 5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   redis:
     image: redis:7
