@@ -9,9 +9,12 @@
 ```
 DB_USER=postgres
 DB_PASS=password
-DB_HOST=localhost
+DB_HOST=db
 DB_PORT=5432
 DB_NAME=urls_project
+
+REDIS_HOST=redis
+REDIS_PORT=6379
 
 JWT_SECRET_KEY=...
 ```
