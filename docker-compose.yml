@@ -4,6 +4,7 @@ services:
   app:
     build:
       context: .
+    restart: always
     container_name: fastapi_app
     command: >
       sh -c "alembic upgrade head && python src/main.py"
@@ -36,6 +37,7 @@ services:
 
   redis:
     image: redis:7
+    restart: always
     container_name: redis_app
     command: --port 6379
     expose:
@@ -45,6 +47,7 @@ services:
     build:
       context: .
     container_name: celery_worker
+    restart: always
     working_dir: /app/src
     command: celery -A tasks.tasks.celery_app worker --loglevel=info
     depends_on:
@@ -54,6 +57,7 @@ services:
     build:
       context: .
     container_name: celery_beat
+    restart: always
     working_dir: /app/src
     command: celery -A tasks.tasks.celery_app beat --loglevel=info
     depends_on:

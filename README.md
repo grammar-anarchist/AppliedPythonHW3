@@ -136,6 +136,8 @@ tiny_url = response['short_code']
 
 Returns a redirect response for the original URL.
 
+Easiest to see by typing `f"{BASE_URL}/links{short_code}` in a browser.
+
 #### GET /links/search
 
 Allows to get all the short codes that refer to the given original URL.
