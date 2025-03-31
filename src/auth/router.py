@@ -93,7 +93,7 @@ async def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme
     except Exception as e:
         return None
 
-@auth_router.get("/me/", response_model=Union[UserPublic, StandardResponse])
+@auth_router.get("/me", response_model=Union[UserPublic, StandardResponse])
 async def read_users_me(
     current_user: Optional[UserPublic] = Depends(get_current_user_optional),
 ):
