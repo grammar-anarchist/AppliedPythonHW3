@@ -31,3 +31,5 @@ services:
         condition: service_healthy
     volumes:
       - ./htmlcov:/test/htmlcov
+    command: >
+      sh -c "pytest tests --cov=src --cov-report=html"
