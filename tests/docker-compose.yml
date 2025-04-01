@@ -18,18 +18,25 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+  
+  redis_test:
+    image: redis:7
+    restart: always
+    container_name: redis_app_test
+    command: --port 6380
+    expose:
+      - 6380
 
-  test_runner:
+  test_client:
     build:
       context: ../
       dockerfile: tests/Dockerfile.test
-    container_name: fastapi_app_test
-    environment:
-      PYTHONPATH: /test/src
+    container_name: test_client
     depends_on:
       db_test:
         condition: service_healthy
+      redis_test: 
+        condition: service_started
     volumes:
       - ./htmlcov:/test/htmlcov
-    command: >
-      sh -c "alembic upgrade head && pytest tests"
+    command: ./tests/run_tests.sh

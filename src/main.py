@@ -12,4 +12,4 @@ app.include_router(links_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True, host="0.0.0.0", log_level="info")
+    uvicorn.run("main:app", reload=False, host="0.0.0.0", log_level="info")

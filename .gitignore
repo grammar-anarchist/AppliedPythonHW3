@@ -184,3 +184,4 @@ migrations/versions/*.pyc
 
 plan.txt
 celerybeat-schedule.db
+create_db.py

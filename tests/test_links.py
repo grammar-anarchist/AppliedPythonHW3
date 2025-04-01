@@ -1,18 +1,31 @@
 import pytest
-from fastapi.testclient import TestClient
+import time
 from datetime import datetime, timedelta, timezone
-from main import app
-'''
-@pytest.mark.asyncio(loop_scope="session")
-async def test_shorten_basic(async_client):
+
+
+def test_shorten_basic(client):
     data = {
         "original_url": "https://google.com"
     }
-    response = await async_client.post("/links/shorten", json=data)
+    response = client.post("/links/shorten", json=data)
     assert response.status_code == 200
     response = response.json()
     assert response["short_code"].isdigit()
 
+
+def test_celery_worker(client):
+    data = {
+        "original_url": "https://yandex.ru",
+        "expires_at": (datetime.now(timezone.utc) + timedelta(seconds=5)).isoformat()
+    }
+    response = client.post("/links/shorten", json=data)
+    response = client.get("/links/search", params={"original_url": "https://yandex.ru"})
+    assert len(response.json()["tiny_urls"]) == 1
+
+    time.sleep(10)
+
+    response = client.get("/links/search", params={"original_url": "https://yandex.ru"})
+    assert len(response.json()["tiny_urls"]) == 0
 
 def test_shorten_with_alias(client):
     data = {
@@ -25,7 +38,7 @@ def test_shorten_with_alias(client):
     assert response["short_code"] == "google"
 
     # alias already taken
-    client.post("/links/shorten", json=data)
+    response = client.post("/links/shorten", json=data)
     assert response.status_code == 400
 
 def test_shorten_forbidden_alias(client):
@@ -68,7 +81,7 @@ def test_delete_unauthenticated(client):
     client.post("/links/shorten", json={"original_url": "https://unauth.com", "alias": "unauth_deletion"})
 
     response = client.delete("/links/unauth_deletion")
-    assert response.status_code == 400
+    assert response.status_code == 401
 
 def test_change(client, access_token):
     client.post("/links/shorten", 
@@ -99,7 +112,7 @@ def test_change_nonexistent(client, access_token):
 def test_change_unauthenticated(client):
     client.post("/links/shorten", json={"original_url": "https://unauth.com", "alias": "unauth_change"})
     response = client.put("/links/unauth_change", json={"new_url": "https://changed.com"})
-    assert response.status_code == 400
+    assert response.status_code == 401
 
 def test_redirect_nonexistent(client):
     response = client.get("/links/nonexistent")
@@ -108,7 +121,7 @@ def test_redirect_nonexistent(client):
 def test_redirect(client):
     client.post("/links/shorten", json={"original_url": "https://redirect.com", "alias": "redirect"})
 
-    response = client.get("/redirect", allow_redirects=False)
+    response = client.get("/links/redirect")
     assert response.status_code == 307
     assert response.headers["Location"] == "https://redirect.com"
 
@@ -123,9 +136,8 @@ def test_stats(client):
     assert response["clicks"] == 5
     assert response["original_url"] == "https://stats.com"
     assert response["last_used_at"] is not None
-    assert response["last_used_at"] > datetime.now(timezone.utc) - timedelta(minutes=1)
+    assert datetime.fromisoformat(response["last_used_at"]) > datetime.now(timezone.utc) - timedelta(minutes=1)
 
 def test_stats_nonexistent(client):
     response = client.get("/links/stats/nonexistent")
-    assert response.status_code == 400
-'''
+    assert response.status_code == 404
