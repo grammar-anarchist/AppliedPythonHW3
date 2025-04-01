@@ -31,6 +31,10 @@ It creates a separate set of docker services, including a separate database and 
 
 Inside the tests, a synchronous `httpx` client is used to make the requests to the app. Using `TestClient` seemingly wasn't an option due to my database setup (it caused constant errors with asyncpg and event loops if more than 1 test was included).
 
+2. Run `docker-compose -f tests/docker-compose.yml down -v  --remove-orphans`
+
+Shuts down the services created for testing.
+
 ## Database description
 
 There are 2 tables: `users` and `urls`.
